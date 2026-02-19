@@ -1,4 +1,5 @@
 ﻿using QueueManagement.Domain.Entities.Abstractions;
+using QueueManagement.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
