@@ -1,0 +1,16 @@
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.AssemblyInfoInputs.cache
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.AssemblyInfo.cs
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.csproj.CoreCompileInputs.cache
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.sourcelink.json
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.csproj.AssemblyReference.cache
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\bin\Debug\net8.0\QueueManagement.Application.deps.json
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\bin\Debug\net8.0\QueueManagement.Application.dll
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\bin\Debug\net8.0\QueueManagement.Application.pdb
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\bin\Debug\net8.0\QueueManagement.Domain.dll
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\bin\Debug\net8.0\QueueManagement.Domain.pdb
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueMan.AEB0B09E.Up2Date
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.dll
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\refint\QueueManagement.Application.dll
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\QueueManagement.Application.pdb
+D:\Project\MyProject\Csharp\QueueManagement\QueueManagement.Application\obj\Debug\net8.0\ref\QueueManagement.Application.dll
