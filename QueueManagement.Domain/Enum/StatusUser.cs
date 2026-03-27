@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QueueManagement.Domain
+namespace QueueManagement.Domain.Enum
 {
     public enum StatusUser : byte
     {

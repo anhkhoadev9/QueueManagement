@@ -18,4 +18,10 @@
     <ProjectReference Include="..\QueueManagement.Domain\QueueManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Auth\Commands\ExternalLogin\" />
+    <Folder Include="Features\Auth\Queries\" />
+    <Folder Include="Features\FeedBack\Queries\GetIdFeedBack\" />
+  </ItemGroup>
+
 </Project>

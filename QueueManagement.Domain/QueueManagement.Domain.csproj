@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\DTO\" />
     <Folder Include="Value Object\" />
   </ItemGroup>
 

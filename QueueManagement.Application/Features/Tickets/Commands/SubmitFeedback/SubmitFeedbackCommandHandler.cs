@@ -24,7 +24,7 @@ namespace QueueManagement.Application.Features.Tickets.Commands.SubmitFeedback
                 throw new Exception("Ticket not found.");
             }
 
-            var feedback = new Feedback(request.TicketId, request.Rating, request.Comment);
+            var feedback = new Feedback(request.TicketId, request.ServiceId, request.Rating, request.Comment);
             
             await _unitOfWork.FeedbackRepository.AddAsync(feedback);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -20,21 +20,20 @@ namespace QueueManagement.Application.Features.Tickets.Queries.GetWaitingTickets
 
         public async Task<List<TicketDto>> Handle(GetWaitingTicketsQuery request, CancellationToken cancellationToken)
         {
-            // Trong thực tế, có thể viết thêm method trong Repository như GetWaitingTicketsAsync() để optimize query DB
-            var tickets = await _unitOfWork.QueueTicketRepository.GetAsync(t => t.Status == TicketStatus.Waiting);
-
-            var ticketDtos = tickets.OrderBy(t => t.IssuedAt).Select(ticket => new TicketDto
+            var tickets = await _unitOfWork.QueueTicketRepository.GetWaitingTicketsWithServiceAsync(cancellationToken);
+ 
+            var ticketDtos = tickets.Select(ticket => new TicketDto
             {
                 Id = ticket.Id,
                 TicketNumber = ticket.TicketNumber,
                 CustomerName = ticket.CustomerName,
                 PhoneNumber = ticket.PhoneNumber,
-                ServiceName = "TBD", // Trong thực tế lấy qua service include
+                ServiceName = ticket.Service?.Name ?? "N/A",
                 Status = ticket.Status,
                 IssuedAt = ticket.IssuedAt,
                 CalledAt = ticket.CalledAt
             }).ToList();
-
+ 
             return ticketDtos;
         }
     }

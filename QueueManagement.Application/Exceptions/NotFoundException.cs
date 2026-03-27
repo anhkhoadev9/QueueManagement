@@ -10,5 +10,10 @@ namespace QueueManagement.Application.Exceptions
             : base($"Entity \"{name}\" ({key}) was not found.", HttpStatusCode.NotFound)
         {
         }
+
+        public NotFoundException(string name)
+           : base($"Entity \"{name}\" was not found.", HttpStatusCode.NotFound)
+        {
+        }
     }
 }

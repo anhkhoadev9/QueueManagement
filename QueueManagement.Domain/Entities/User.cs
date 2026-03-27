@@ -1,8 +1,9 @@
-﻿using QueueManagement.Domain.Entities.Abstractions;
+using QueueManagement.Domain.Entities.Abstractions;
 using QueueManagement.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,17 +17,27 @@ namespace QueueManagement.Domain.Entities
         public string PhoneNumber { get; private set; } = null!;
         public DateTime BirthDay { get; private set; }
         public StatusUser StatusUser { get; private set; }
+        public Guid ProviderId { get; private set; }
+        public string ProviderName { get; private set; } = null!;
+
+        public List<RefreshToken> RefreshToken { get; set; } = new();
+        public Guid IdentityUserId { get; private set; }
+
 
         private static readonly Random _random = new();
         public User() { }
         public User(string fullName, string email, string phoneNumber, DateTime birthDay, StatusUser status = StatusUser.Pending)
         {
+            Id = Guid.NewGuid();
             Code = GenerateCode(fullName);
             FullName = fullName;
             Email = email;
             PhoneNumber = phoneNumber;
             BirthDay = birthDay;
+
+            ProviderName = "LOCAL";
             StatusUser = status;
+
         }
 
         public void UpdateProfile(string fullName, string email, string phoneNumber, DateTime birthDay, StatusUser status)
@@ -36,6 +47,7 @@ namespace QueueManagement.Domain.Entities
             Email = email;
             PhoneNumber = phoneNumber;
             BirthDay = birthDay;
+            StatusUser = status;
 
         }
 
