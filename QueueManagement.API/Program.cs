@@ -235,11 +235,12 @@ app.UseAuthorization();
 //if (app.Environment.IsDevelopment())
 //{
 //    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "QueueManagement API V1");
-        c.RoutePrefix = "swagger";
-    });
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "QueueManagement API V1");
+    c.RoutePrefix = string.Empty;     // Swagger hiện ngay tại root domain (dễ test nhất)
+});
 //}
 
 // 8. Endpoints - Cuối cùng
