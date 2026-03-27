@@ -231,15 +231,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // 7. Swagger - Chỉ Development
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "QueueManagement API V1");
         c.RoutePrefix = "swagger";
     });
-}
+//}
 
 // 8. Endpoints - Cuối cùng
 app.MapControllers();
