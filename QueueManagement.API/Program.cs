@@ -184,6 +184,8 @@ if (allowedOrigins == null || allowedOrigins.Length == 0)
     Console.WriteLine("WARNING: No allowed origins configured. Using defaults.");
     allowedOrigins = new[]
     {
+        "http://localhost:5173",   // ← Thêm origin Vite của bạn
+        "https://localhost:5173",
         "http://localhost:3000",
         "https://localhost:3000",
         "http://localhost:5000",
