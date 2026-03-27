@@ -1,6 +1,10 @@
 ﻿# ===== BASE =====
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 8668                                      # ← đổi thành 8668
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:8668                # ← đổi thành 8668
+ENV PORT=8668
 
 # ===== BUILD =====
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -25,7 +29,7 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
-# 🔥 QUAN TRỌNG CHO RENDER
-ENV ASPNETCORE_URLS=http://+:$PORT
+## 🔥 QUAN TRỌNG CHO RENDER
+#ENV ASPNETCORE_URLS=http://+:$PORT
 
 ENTRYPOINT ["dotnet", "QueueManagement.API.dll"]

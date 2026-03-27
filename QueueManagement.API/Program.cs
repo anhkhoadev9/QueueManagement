@@ -33,7 +33,8 @@ builder.Host.UseSerilog((context, config) =>
     var seqServerUrl = context.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
     config.WriteTo.Seq(seqServerUrl);
 });
-
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8668";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 // ===== 2. THÊM DIAGNOSTIC CONTEXT CHO SERILOG =====
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<Serilog.Core.LoggingLevelSwitch>();
