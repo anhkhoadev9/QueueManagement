@@ -1,9 +1,9 @@
 ﻿# ===== BASE =====
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8668                                      # ← đổi thành 8668
+EXPOSE 8668                                     
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:8668                # ← đổi thành 8668
+ENV ASPNETCORE_URLS=http://+:8668               
 ENV PORT=8668
 
 # ===== BUILD =====
