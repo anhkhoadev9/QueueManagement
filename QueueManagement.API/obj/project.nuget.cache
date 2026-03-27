@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "syFsmvNsQj4h0FH5m/xI3wqZ8eAZ0RFRK9iIJuN9KSX2f6rfynVmaErxLTWdrUm60CXA+kVXsC1pzn/Y6NrH6A==",
+  "dgSpecHash": "o66DylD5VsPg3pfulWiB2X7NXRpFTfHS9TAwQYP+t9Su8+JWHFLKDEbNxnZ0heDt77y/ODn4iAn0FYrgb7o9pA==",
   "success": true,
   "projectFilePath": "D:\\Project\\MyProject\\Csharp\\QueueManagement\\QueueManagement.API\\QueueManagement.API.csproj",
   "expectedPackageFiles": [
@@ -48,6 +48,7 @@
     "C:\\Users\\ASUS\\.nuget\\packages\\microsoft.identitymodel.protocols.openidconnect\\7.1.2\\microsoft.identitymodel.protocols.openidconnect.7.1.2.nupkg.sha512",
     "C:\\Users\\ASUS\\.nuget\\packages\\microsoft.identitymodel.tokens\\8.14.0\\microsoft.identitymodel.tokens.8.14.0.nupkg.sha512",
     "C:\\Users\\ASUS\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\ASUS\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.19.6\\microsoft.visualstudio.azure.containers.tools.targets.1.19.6.nupkg.sha512",
     "C:\\Users\\ASUS\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\ASUS\\.nuget\\packages\\npgsql\\8.0.0\\npgsql.8.0.0.nupkg.sha512",
     "C:\\Users\\ASUS\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.0\\npgsql.entityframeworkcore.postgresql.8.0.0.nupkg.sha512",

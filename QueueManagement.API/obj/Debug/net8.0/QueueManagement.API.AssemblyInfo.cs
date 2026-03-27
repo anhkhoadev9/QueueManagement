@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("fd1fb719-4f0c-4a02-8a15-c771243c9cee")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("QueueManagement.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14e541063a50a025855a26f4af3ba53f1bb5946c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+07e11877fce9f8b2b6dd0ac236062aa75ac9aaf1")]
 [assembly: System.Reflection.AssemblyProductAttribute("QueueManagement.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QueueManagement.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

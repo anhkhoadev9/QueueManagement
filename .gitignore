@@ -1,2 +1,19 @@
+# Build
 "**/obj/" 
 "**/bin/" 
+ 
+# Visual Studio
+.vs/
+ 
+# Logs
+*.log
+
+# Seq data
+seq-data/
+
+# Docker
+docker-compose.yml
+appsettings.Development.json
+
+
+ 
