@@ -35,9 +35,17 @@ namespace QueueManagement.Infrastructure.Persistence.Repositories
         {
             return await _dbSet
                 .Include(q => q.Service)
-                .Where(q => q.Status == TicketStatus.Called || q.Status == TicketStatus.InProgress)
+                .Where(q => q.Status ==  TicketStatus.InProgress)
                 .OrderByDescending(q => q.CalledAt)
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+        public async Task<List<QueueTicket>> GetAllWaitingTicketsWithServiceAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(q => q.Service)
+                .Where(q => q.Status == TicketStatus.Waiting||q.Status==TicketStatus.InProgress|| q.Status == TicketStatus.Skipped)
+                .OrderBy(q => q.IssuedAt)
+                .ToListAsync(cancellationToken);
         }
         public async Task<List<QueueTicket>> GetWaitingTicketsWithServiceAsync(CancellationToken cancellationToken = default)
         {

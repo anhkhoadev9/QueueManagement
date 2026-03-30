@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using QueueManagement.Application.DTOs;
 using QueueManagement.Domain.Entities;
 using QueueManagement.Domain.Entities.DTOs;
@@ -29,5 +29,10 @@ namespace QueueManagement.Application.Common.Interfaces
         Task<bool> ValidateCredentialsAsync(string loginInfo, string password);
         Task<string> ForgotPassword(string email,CancellationToken cancellationToken=default);
         Task<bool> ChangePasswordAsync( string oldPassword,string newPassword,CancellationToken cancellation=default);
-    }
+
+        Task<AuthResponseDto> ExchangeGoogleCodeAsync(string code, CancellationToken cancellationToken = default);
+        Task<GoogleUserDto> GetGoogleUserInfoAsync(string accessToken, CancellationToken cancellationToken = default);
+        Task<(UserDto domainUser, Guid identityId)> FindOrCreateGoogleUserAsync(GoogleUserDto googleUser, CancellationToken cancellationToken = default);
+        public   Task<AuthResponseDto> GoogleLoginAsync(string code, CancellationToken cancellationToken = default);
+        }
 }

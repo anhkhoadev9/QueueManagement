@@ -45,7 +45,7 @@ namespace QueueManagement.Application.Features.Users.Commands.CreateUser
             await _unitOfWork.BeginTransactionAsync();
             try
             {
-                var user = new User(request.FullName, request.Email, request.PhoneNumber, request.BirthDay, QueueManagement.Domain.Enum.StatusUser.Active);
+                var user = new User(request.FullName, request.Email, request.PhoneNumber, request.BirthDay,null, QueueManagement.Domain.Enum.StatusUser.Active);
                 
                 await _unitOfWork.UserRepository.AddAsync(user, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);

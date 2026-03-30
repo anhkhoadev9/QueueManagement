@@ -13,6 +13,7 @@ using QueueManagement.Application.Features.Tickets.Commands.SubmitFeedback;
 using QueueManagement.Application.Features.Tickets.Queries.GetPaginatedTickets;
 using QueueManagement.Application.Features.Tickets.Queries.GetTicketHistoryByTicketId;
 using QueueManagement.Application.Features.Tickets.Commands.CallNextTicket;
+using QueueManagement.Application.Features.Tickets.Queries.GetAllWattingTickets;
 
 namespace QueueManagement.API.Controllers
 {
@@ -43,6 +44,15 @@ namespace QueueManagement.API.Controllers
         {
             // Query không cần tham số - tạo mới trong action
             var query = new GetWaitingTicketsQuery();
+            var result = await _mediator.Send(query, cancellation);
+            return Ok(result);
+        }
+        [HttpGet("waitings")]
+        public async Task<ActionResult<List<TicketDto>>> GetAllWaitingTickets(
+    CancellationToken cancellation)
+        {
+            // Query không cần tham số - tạo mới trong action
+            var query = new GetAllWattingTicketsQuery();
             var result = await _mediator.Send(query, cancellation);
             return Ok(result);
         }

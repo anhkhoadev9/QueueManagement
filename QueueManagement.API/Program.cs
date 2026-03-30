@@ -18,7 +18,7 @@ using System.Text.Json;
 using Serilog; // Using Serilog
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddHttpClient();
 // ===== 1. CẤU HÌNH SERILOG - CHỈ 1 LẦN =====
 builder.Host.UseSerilog((context, config) =>
 {
@@ -33,8 +33,12 @@ builder.Host.UseSerilog((context, config) =>
     var seqServerUrl = context.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
     config.WriteTo.Seq(seqServerUrl);
 });
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8668";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+var port = Environment.GetEnvironmentVariable("PORT");
+
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 // ===== 2. THÊM DIAGNOSTIC CONTEXT CHO SERILOG =====
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<Serilog.Core.LoggingLevelSwitch>();
@@ -238,13 +242,15 @@ app.UseAuthorization();
 // 7. Swagger - Chỉ Development
 //if (app.Environment.IsDevelopment())
 //{
-//    app.UseSwagger();
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "QueueManagement API V1");
-    c.RoutePrefix = string.Empty;     // Swagger hiện ngay tại root domain (dễ test nhất)
+    /*c.RoutePrefix = string.Empty;*/
+    c.RoutePrefix = "swagger";// Swagger hiện ngay tại root domain (dễ test nhất)
 });
+app.Logger.LogInformation("🚀 URLs: {urls}", app.Urls);
 //}
 
 // 8. Endpoints - Cuối cùng

@@ -37,29 +37,32 @@ namespace QueueManagement.Domain.Entities
         public void MarkAsCalled()
         {
             if (Status != TicketStatus.Waiting)
-                throw new Exception("Ticket must be in Waiting status to be called.");
-
-            Status = TicketStatus.Called;
-            CalledAt = DateTime.UtcNow;
-        }
-        
-        public void MarkAsInProgress()
-        {
-            if (Status != TicketStatus.Called)
                 throw new Exception("Ticket must be Called before InProgress.");
 
             Status = TicketStatus.InProgress;
         }
 
+        public void MarkAsInProgress()
+        {
+            if (Status != TicketStatus.Waiting)
+                throw new Exception("Ticket must be Called before InProgress.");
+
+            Status = TicketStatus.InProgress;
+            CalledAt = DateTime.UtcNow;
+        }
+
         public void MarkAsCompleted()
         {
-            if (Status != TicketStatus.InProgress && Status != TicketStatus.Called)
+            if (Status != TicketStatus.InProgress)
                  throw new Exception("Ticket cannot be completed from current status.");
 
             Status = TicketStatus.Completed;
             CompletedAt = DateTime.UtcNow;
         }
-
+        public void MarkAsSkipped()
+        {
+            Status = TicketStatus.Skipped;
+        }
         public void MarkAsCancelled()
         {
             Status = TicketStatus.Cancelled;

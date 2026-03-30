@@ -13,5 +13,6 @@ namespace QueueManagement.Domain.Entities.DTOs
         public int ExpiresIn { get; set; } // Thời gian sống của access token (giây)
         public string TokenType { get; set; } = "Bearer";
         public DateTime ExpiresAt { get; set; } // Thời gian hết hạn cụ thể
+         
     }
 }

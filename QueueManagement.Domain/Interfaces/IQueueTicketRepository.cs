@@ -9,6 +9,7 @@ namespace QueueManagement.Domain.Interfaces
         Task<QueueTicket?> GetTicketWithDetailsAsync(Guid ticketId, CancellationToken cancellationToken = default);
         Task<int> GetTodayTicketCountAsync(CancellationToken cancellationToken = default);
         Task<QueueTicket?> GetCurrentlyCalledTicketAsync(CancellationToken cancellationToken = default);
+        Task<List<QueueTicket>> GetAllWaitingTicketsWithServiceAsync(CancellationToken cancellationToken = default);
         Task<List<QueueTicket>> GetWaitingTicketsWithServiceAsync(CancellationToken cancellationToken = default);
     }
 }

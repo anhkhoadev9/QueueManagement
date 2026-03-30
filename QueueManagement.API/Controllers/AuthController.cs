@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueueManagement.API.Middlewares;
 using QueueManagement.Application.Features.Auth.Commands.ChangePassword;
+using QueueManagement.Application.Features.Auth.Commands.ExternalLogin;
 using QueueManagement.Application.Features.Auth.Commands.ForgotPassword;
 using QueueManagement.Application.Features.Auth.Commands.Login;
 using QueueManagement.Application.Features.Auth.Commands.Logout;
@@ -77,6 +78,13 @@ namespace QueueManagement.API.Controllers
           
             await _mediator.Send(request, cancellation);
             return NoContent();
+        }
+        [HttpPost("google-callback")]
+        public async Task<ActionResult<AuthResponseDto>> GoogleLogin(
+            [FromBody] GoogleLoginCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
 
     }

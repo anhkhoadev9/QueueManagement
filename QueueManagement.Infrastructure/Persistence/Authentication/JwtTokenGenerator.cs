@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using QueueManagement.Domain.Entities.DTOs;
 using QueueManagement.Domain.Entities;
@@ -51,10 +51,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             {
                 AccessToken = tokenString,
                 RefreshToken = GenerateRefreshToken(),
-                ExpiresAt = DateTime.UtcNow,
-                ExpiresIn= 3600,
-                
-                
+                ExpiresAt = expires,
+                ExpiresIn = (int)TimeSpan.FromMinutes(_jwtSettings.ExpiryMinutes).TotalSeconds,
             };
         }
         catch (Exception ex)

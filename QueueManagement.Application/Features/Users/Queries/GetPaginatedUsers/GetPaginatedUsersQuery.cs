@@ -46,7 +46,7 @@ namespace QueueManagement.Application.Features.Users.Queries.GetPaginatedUsers
                     FullName = u.FullName,
                     Email = u.Email,
                     PhoneNumber = u.PhoneNumber,
-                    BirthDay = u.BirthDay,
+                    BirthDay = u.BirthDay ?? default,
                     StatusUser = u.StatusUser,
                     ProviderName = u.ProviderName
                 },

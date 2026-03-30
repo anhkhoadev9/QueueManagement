@@ -21,7 +21,7 @@ namespace QueueManagement.Infrastructure.Persistence.Context
         public DbSet<Feedback> Feedbacks { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
-
+        public DbSet<EmailLog> EmailLogs { get; set; } = null!;
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

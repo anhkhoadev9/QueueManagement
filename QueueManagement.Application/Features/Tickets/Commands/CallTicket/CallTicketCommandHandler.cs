@@ -30,6 +30,7 @@ namespace QueueManagement.Application.Features.Tickets.Commands.CallTicket
             
             ticket.MarkAsCalled();
 
+
             _unitOfWork.QueueTicketRepository.Update(ticket);
 
             // Log history

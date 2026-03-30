@@ -29,9 +29,9 @@ namespace QueueManagement.Application.Features.Tickets.Commands.CallNextTicket
                 throw new Exception("No tickets in waiting queue.");
             }
 
-            var oldStatus = nextTicket.Status;
-            nextTicket.MarkAsCalled();
-
+            var oldStatus = nextTicket.Status;// watting
+            //nextTicket.MarkAsCalled();
+            nextTicket.MarkAsInProgress();// gán lại thành InProgress (đang phục vụ)
             _unitOfWork.QueueTicketRepository.Update(nextTicket);
 
             // Log history

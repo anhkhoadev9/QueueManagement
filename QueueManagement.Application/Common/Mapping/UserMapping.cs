@@ -18,6 +18,7 @@ namespace QueueManagement.Application.Common.Mapping
                 command.FullName,
                 command.Email,
                 command.PhoneNumber,
+                
                 birthDateUtc
 
             );

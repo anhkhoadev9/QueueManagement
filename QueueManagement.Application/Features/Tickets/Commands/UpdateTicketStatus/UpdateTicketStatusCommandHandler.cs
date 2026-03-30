@@ -43,6 +43,9 @@ namespace QueueManagement.Application.Features.Tickets.Commands.UpdateTicketStat
                 case TicketStatus.Cancelled:
                     ticket.MarkAsCancelled();
                     break;
+                case TicketStatus.Skipped:
+                    ticket.MarkAsSkipped();
+                    break;
                 default:
                     throw new Exception("Invalid status transition.");
             }

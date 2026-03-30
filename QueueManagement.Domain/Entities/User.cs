@@ -14,8 +14,8 @@ namespace QueueManagement.Domain.Entities
         public string Code { get; private set; } = null!;
         public string FullName { get; private set; } = null!;
         public string Email { get; private set; } = null!;
-        public string PhoneNumber { get; private set; } = null!;
-        public DateTime BirthDay { get; private set; }
+        public string PhoneNumber { get; private set; }
+        public DateTime? BirthDay { get; private set; }
         public StatusUser StatusUser { get; private set; }
         public Guid ProviderId { get; private set; }
         public string ProviderName { get; private set; } = null!;
@@ -26,7 +26,7 @@ namespace QueueManagement.Domain.Entities
 
         private static readonly Random _random = new();
         public User() { }
-        public User(string fullName, string email, string phoneNumber, DateTime birthDay, StatusUser status = StatusUser.Pending)
+        public User(string fullName, string email, string phoneNumber, DateTime? birthDay, string? providerName=null, StatusUser status = StatusUser.Pending)
         {
             Id = Guid.NewGuid();
             Code = GenerateCode(fullName);
@@ -34,19 +34,21 @@ namespace QueueManagement.Domain.Entities
             Email = email;
             PhoneNumber = phoneNumber;
             BirthDay = birthDay;
-
-            ProviderName = "LOCAL";
+            ProviderName = string.IsNullOrEmpty(providerName) ? "LOCAL" : providerName;
             StatusUser = status;
 
         }
 
-        public void UpdateProfile(string fullName, string email, string phoneNumber, DateTime birthDay, StatusUser status)
+        public void UpdateProfile(string fullName, string email, string phoneNumber, DateTime? birthDay, StatusUser status)
         {
 
             FullName = fullName;
             Email = email;
             PhoneNumber = phoneNumber;
-            BirthDay = birthDay;
+            if (birthDay.HasValue)
+            {
+                BirthDay = birthDay.Value;
+            }
             StatusUser = status;
 
         }

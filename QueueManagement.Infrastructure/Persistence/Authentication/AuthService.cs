@@ -1,8 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QueueManagement.Application.Common.Interfaces;
 using QueueManagement.Application.DTOs;
@@ -10,6 +11,7 @@ using QueueManagement.Application.Exceptions;
 using QueueManagement.Application.Features.Auth.Commands.Login;
 using QueueManagement.Domain.Entities;
 using QueueManagement.Domain.Entities.DTOs;
+using QueueManagement.Domain.Enum;
 using QueueManagement.Domain.Interfaces;
 using QueueManagement.Domain.Validators;
 using QueueManagement.Infrastructure.Identity;
@@ -18,9 +20,11 @@ using QueueManagement.Infrastructure.Persistence.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Numerics;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -31,7 +35,7 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly QueueManagementDbContext _context;
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly IUnitOfWork _unitOfWrok;
+
         private readonly IPasswordGenerator _passwordGenerator;
         private readonly IEmailLogRepository _emailLogRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -41,13 +45,15 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly IRoleService _roleService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
         public AuthService(
-            UserManager<ApplicationUser> userManager, QueueManagementDbContext context, IHttpContextAccessor contextAccessor, IUnitOfWork unitOfWrok, IPasswordGenerator passwordGenerator, IEmailLogRepository emailLogRepository,IHttpContextAccessor httpContextAccessor, SignInManager<ApplicationUser> signInManager, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IJwtTokenGenerator jwtTokenGenerator, IRoleService roleService, IUnitOfWork unitOfWork) // Thêm context
+            UserManager<ApplicationUser> userManager, QueueManagementDbContext context, IHttpContextAccessor contextAccessor, IPasswordGenerator passwordGenerator, IEmailLogRepository emailLogRepository, IHttpContextAccessor httpContextAccessor, SignInManager<ApplicationUser> signInManager, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IJwtTokenGenerator jwtTokenGenerator, IRoleService roleService, IUnitOfWork unitOfWork, IConfiguration configuration, IHttpClientFactory httpClientFactory) // Thêm context
         {
             _userManager = userManager;
             _context = context;
             _contextAccessor = contextAccessor;
-            _unitOfWrok = unitOfWrok;
+
             _passwordGenerator = passwordGenerator;
             _emailLogRepository = emailLogRepository;
             _httpContextAccessor = httpContextAccessor;
@@ -57,6 +63,8 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             _jwtTokenGenerator = jwtTokenGenerator;
             _roleService = roleService;
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
         }
         #region Register
         public async Task<Guid> CreateUserAsync(string username, string email, string password,
@@ -140,7 +148,7 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
                 {
 
                     token.Revoke();
-                    await _unitOfWrok.SaveChangesAsync();  // Nếu dùng DbContext trực tiếp
+                    await _unitOfWork.SaveChangesAsync();  // Nếu dùng DbContext trực tiếp
                 }
                 // Nếu không tìm thấy token → vẫn coi như OK (có thể đã revoke trước)
             }
@@ -156,8 +164,9 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             return true;
         }
 
-#endregion
+        #endregion
         #region ForgotPassword
+
         public async Task<string> ForgotPassword(string email, CancellationToken cancellationToken = default)
         {
             var subject = "Yêu cầu khôi phục mật khẩu";
@@ -170,9 +179,14 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             var newPassword = _passwordGenerator.Generate();
 
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-
+            Console.WriteLine($"Password raw: {newPassword}");
             // Reset password bằng token
             var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+            Console.WriteLine($"Reset success: {result.Succeeded}");
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine(error.Description);
+            }
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -180,15 +194,69 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             }
             var body = $@"<h3>Khôi phục mật khẩu</h3><p>Mật khẩu mới của bạn: <strong>{newPassword}</strong></p><p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>";
             await _emailLogRepository.SendAsync(input, subject, body);
-            await _userManager.UpdateAsync(user); ;
+            /*await _userManager.UpdateAsync(user); */
+            ;
             return newPassword;
         }
-#endregion
+        #endregion
         #region ChangePassword
+        //public async Task<bool> ChangePasswordAsync(string oldPassword,string newPassword,CancellationToken cancellationToken = default)
+        //{
+        //    // 1. Validate new password
+        //    var (isValid, errors) = PasswordValidator.Validate(newPassword);
+        //    if (!isValid)
+        //    {
+        //        var errorDict = new Dictionary<string, string[]>
+        //{
+        //    { "NewPassword", errors.ToArray() }
+        //};
+        //        throw new ValidationException(errorDict);
+        //    }
+
+        //    // 2. Kiểm tra HttpContext
+        //    if (_httpContextAccessor.HttpContext == null)
+        //    {
+        //        throw new InvalidOperationException("HttpContext is not available");
+        //    }
+
+        //    // 3. Lấy user hiện tại từ HttpContext (không cần tìm lại bằng email)
+        //    var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+        //    if (currentUser == null)
+        //    {
+        //        throw new UnauthorizedException("User not found or not authenticated");
+        //    }
+
+        //    // 4. Kiểm tra user có password không
+        //    if (!await _userManager.HasPasswordAsync(currentUser))
+        //    {
+        //        throw new BadRequestException("User does not have a password set. Please use external login.");
+        //    }
+
+        //    // 5. Đổi mật khẩu
+        //    var result = await _userManager.ChangePasswordAsync(currentUser, oldPassword, newPassword);
+
+        //    // 6. Kiểm tra kết quả
+        //    if (!result.Succeeded)
+        //    {
+        //        var errorsMsg = string.Join(", ", result.Errors.Select(e => e.Description));
+
+        //        // Phân biệt lỗi để trả về đúng status code
+        //        if (errorsMsg.Contains("Incorrect password") ||
+        //            errorsMsg.Contains("incorrect password") ||
+        //            errorsMsg.Contains("Invalid password"))
+        //        {
+        //            throw new UnauthorizedException("Old password is incorrect");
+        //        }
+
+        //        throw new BadRequestException($"Change password failed: {errorsMsg}");
+        //    }
+
+        //    return true;
+        //}
         public async Task<bool> ChangePasswordAsync(
-     string oldPassword,
-     string newPassword,
-     CancellationToken cancellationToken = default)
+    string oldPassword,
+    string newPassword,
+    CancellationToken cancellationToken = default)
         {
             // 1. Validate new password
             var (isValid, errors) = PasswordValidator.Validate(newPassword);
@@ -207,26 +275,70 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
                 throw new InvalidOperationException("HttpContext is not available");
             }
 
-            // 3. Lấy user hiện tại từ HttpContext (không cần tìm lại bằng email)
-            var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+            var userPrincipal = _httpContextAccessor.HttpContext.User;
+
+            // 3. Lấy UserId từ claims (thử nhiều claim types khác nhau)
+            var userId = userPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                userId = userPrincipal.FindFirst("sub")?.Value;
+            }
+
+            // 4. Lấy email từ claims (phòng trường hợp)
+            var email = userPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+            {
+                email = userPrincipal.FindFirst("email")?.Value;
+            }
+
+            // Log để debug
+
+
+            // 5. Tìm user bằng UserId
+            ApplicationUser currentUser = null;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                currentUser = await _userManager.FindByIdAsync(userId);
+
+            }
+
+            // 6. Nếu không tìm thấy bằng Id, thử tìm bằng email
+            if (currentUser == null && !string.IsNullOrEmpty(email))
+            {
+                currentUser = await _userManager.FindByEmailAsync(email);
+
+            }
+
+            // 7. Nếu vẫn không tìm thấy, thử tìm bằng username (nếu email là username)
+            if (currentUser == null && !string.IsNullOrEmpty(email))
+            {
+                currentUser = await _userManager.FindByNameAsync(email);
+
+            }
+
             if (currentUser == null)
             {
+
                 throw new UnauthorizedException("User not found or not authenticated");
             }
 
-            // 4. Kiểm tra user có password không
+
+
+            // 8. Kiểm tra user có password không
             if (!await _userManager.HasPasswordAsync(currentUser))
             {
                 throw new BadRequestException("User does not have a password set. Please use external login.");
             }
 
-            // 5. Đổi mật khẩu
+            // 9. Đổi mật khẩu
             var result = await _userManager.ChangePasswordAsync(currentUser, oldPassword, newPassword);
 
-            // 6. Kiểm tra kết quả
+            // 10. Kiểm tra kết quả
             if (!result.Succeeded)
             {
                 var errorsMsg = string.Join(", ", result.Errors.Select(e => e.Description));
+
 
                 // Phân biệt lỗi để trả về đúng status code
                 if (errorsMsg.Contains("Incorrect password") ||
@@ -239,9 +351,10 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
                 throw new BadRequestException($"Change password failed: {errorsMsg}");
             }
 
+
             return true;
         }
-#endregion
+        #endregion
 
 
         public async Task<bool> ValidateCredentialsAsync(string loginInfo, string password)
@@ -300,7 +413,7 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             var tokens = await _jwtTokenGenerator.GenerateTokenAsync(user.UserId, user.Email, roles);
 
             // 7. Save refresh token
-            var refreshToken = QueueManagement.Domain.Entities.RefreshToken.Create(domainUser.Id, tokens.RefreshToken);
+            var refreshToken = RefreshToken.Create(domainUser.Id, tokens.RefreshToken);
             await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -315,5 +428,184 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             };
         }
         #endregion
+        public async Task<AuthResponseDto> ExchangeGoogleCodeAsync(string code, CancellationToken cancellationToken = default)
+        {
+            // 1. Lấy cấu hình từ appsettings
+            var clientId = _configuration["Google:ClientId"];
+            var clientSecret = _configuration["Google:ClientSecret"];
+            var redirectUri = _configuration["Google:RedirectUri"];
+
+            // 2. Tạo HttpClient
+            var httpClient = _httpClientFactory.CreateClient();
+
+            // 3. Tạo form data (x-www-form-urlencoded)
+            var tokenRequest = new Dictionary<string, string>
+            {
+                ["code"] = code,
+                ["client_id"] = clientId,
+                ["client_secret"] = clientSecret,
+                ["redirect_uri"] = redirectUri,
+                ["grant_type"] = "authorization_code"
+            };
+
+            // 4. Gửi POST request đến Google
+            var response = await httpClient.PostAsync(
+                "https://oauth2.googleapis.com/token",
+                new FormUrlEncodedContent(tokenRequest),
+                cancellationToken
+            );
+
+            // 5. Đọc response
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            // 6. Kiểm tra lỗi
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Google token exchange failed: {content}");
+            }
+
+            // 7. Parse JSON response
+            var tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponseDto>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            // 8. Trả về AuthResponseDto
+            return new AuthResponseDto
+            {
+                AccessToken = tokenResponse.access_token,
+                RefreshToken = tokenResponse.refresh_token,
+                ExpiresIn = tokenResponse.expires_in,
+                TokenType = tokenResponse.token_type
+            };
+        }
+
+        public async Task<GoogleUserDto> GetGoogleUserInfoAsync(
+     string accessToken,
+     CancellationToken cancellationToken = default)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await httpClient.GetAsync(
+                "https://www.googleapis.com/oauth2/v2/userinfo",
+                cancellationToken
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync(cancellationToken);
+                throw new BadRequestException($"Failed to get user info: {error}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            return JsonSerializer.Deserialize<GoogleUserDto>(
+                content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+        }
+
+        public async Task<(UserDto domainUser, Guid identityId)> FindOrCreateGoogleUserAsync(GoogleUserDto googleUser, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(googleUser.Email))
+                throw new ArgumentException("Email is required");
+
+            var identityUser = await _userManager.FindByEmailAsync(googleUser.Email);
+            User domainUser;
+
+            if (identityUser == null)
+            {
+                // 1. Tạo DomainUser
+                domainUser = new User(
+                    fullName: googleUser.Name,
+                    email: googleUser.Email,
+                    phoneNumber: string.Empty,
+                    birthDay: null,
+                    providerName: "GOOGLE",
+                    status: StatusUser.Active
+                );
+
+                await _userRepository.AddAsync(domainUser, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken); // ✅ commit xong
+
+                // 2. Tạo IdentityUser sau khi DomainUser đã tồn tại
+                identityUser = new ApplicationUser
+                {
+                    UserName = googleUser.Email,
+                    Email = googleUser.Email,
+                    EmailConfirmed = true,
+                    UserId = domainUser.Id
+                };
+
+                var result = await _userManager.CreateAsync(identityUser);
+                if (!result.Succeeded)
+                    throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+                await _userManager.AddToRoleAsync(identityUser, "User");
+            }
+            else
+            {
+                // 3. Lấy DomainUser đã tồn tại
+                domainUser = await _userRepository.GetByIdAsync(identityUser.UserId, cancellationToken)
+                    ?? throw new Exception($"Domain user not found for UserId: {identityUser.UserId}");
+            }
+
+            return (new UserDto
+            {
+                Id = domainUser.Id,
+                Code = domainUser.Code,
+                FullName = domainUser.FullName,
+                Email = domainUser.Email,
+                PhoneNumber = domainUser.PhoneNumber,
+                BirthDay = domainUser.BirthDay ?? default,
+                ProviderName = domainUser.ProviderName,
+                StatusUser = domainUser.StatusUser
+            }, identityUser.Id);
+        }
+        public async Task<AuthResponseDto> GoogleLoginAsync(string code,CancellationToken cancellationToken = default)
+        {
+            // 1. Exchange code
+            var googleToken = await ExchangeGoogleCodeAsync(code, cancellationToken);
+
+            // 2. Get user info
+            var googleUser = await GetGoogleUserInfoAsync(
+                googleToken.AccessToken,
+                cancellationToken);
+
+            // 3. Find or create user
+            var (user, identityId) = await FindOrCreateGoogleUserAsync(
+                googleUser,
+                cancellationToken);
+            
+            // 4. Get roles
+            var roles = await _roleService.GetUserRoles(identityId); 
+
+            // 5. Generate JWT (🔥 quan trọng nhất)
+            var tokens = await _jwtTokenGenerator.GenerateTokenAsync(
+                user.Id,
+                user.Email,
+                roles);
+
+            // 6. Save refresh token
+            var refreshToken = RefreshToken.Create(user.Id, tokens.RefreshToken);
+            await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // 7. Return (🔥 chỉ trả token của hệ thống)
+            return new AuthResponseDto
+            {
+                AccessToken = tokens.AccessToken,
+                RefreshToken = tokens.RefreshToken,
+                ExpiresAt = tokens.ExpiresAt,
+                ExpiresIn = tokens.ExpiresIn,
+                TokenType = tokens.TokenType
+            };
+        }
     }
+
+
 }
+
