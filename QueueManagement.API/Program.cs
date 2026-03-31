@@ -305,7 +305,7 @@ builder.Services.AddHttpClient();
 builder.Host.UseSerilog((context, config) =>
 {
     // 🔥 Tắt reloadOnChange để tránh file watcher
-    config.ReadFrom.Configuration(context.Configuration, reloadOnChange: false)
+    config.ReadFrom.Configuration(context.Configuration)
           .Enrich.WithProperty("Application", "QueueManagement")
           .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName);
 
