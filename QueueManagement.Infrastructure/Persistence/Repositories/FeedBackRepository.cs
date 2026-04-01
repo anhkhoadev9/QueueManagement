@@ -16,16 +16,7 @@ namespace QueueManagement.Infrastructure.Persistence.Repositories
 
         public FeedBackRepository(QueueManagementDbContext context) : base(context) { }
 
-        //public async Task<List<Feedback>> GetByQueueTicketIdAsync(Guid queueTicketId)
-        //{
-        //    return await _context.Feedbacks
-        //        .Where(f => f.QueueTicketId == queueTicketId)
-        //        .ToListAsync();
-        //}
-        //public async Task<Feedback?> GetByIdAsync(Guid id)
-        //{
-        //    return await _context.Feedbacks.Where(f => f.Id == id).FirstOrDefaultAsync();
-        //}
+        
 
     }
 }

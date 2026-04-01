@@ -5,6 +5,9 @@ using QueueManagement.Application.Features.FeedBack.Commands.UpdateFeedBack;
 using QueueManagement.Application.Features.FeedBack.Commands.DeleteFeedBack;
 using QueueManagement.Application.Features.FeedBack.Queries.GetFeedbackByServiceId;
 using QueueManagement.Application.Features.FeedBack.Queries.GetPaginateByQueueTicket;
+using QueueManagement.Application.Common.GenericPage;
+using QueueManagement.Application.DTOs;
+using QueueManagement.Application.Features.FeedBack.Queries.GetPaginated;
 
 namespace QueueManagement.API.Controllers
 {
@@ -48,10 +51,18 @@ namespace QueueManagement.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPaginatedFeedback([FromQuery] GetPaginateFeedBackByQueueTicketQuery query, CancellationToken cancellationToken)
+        [HttpGet("{QueueTicketID:guid}")]
+        public async Task<IActionResult> GetPaginatedFeedback([FromRoute] GetPaginateFeedBackByQueueTicketQuery query, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<PaginatedResult<FeedbackDto>>>GetPaginated([FromQuery] GetPaginatedQuery query, CancellationToken cancellationToken)
+        {
+
+            var result= await _mediator.Send(query,cancellationToken);
             return Ok(result);
         }
     }

@@ -28,10 +28,7 @@ namespace QueueManagement.API.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateService([FromRoute] Guid id, [FromBody] UpdatedServiceCommands command, CancellationToken cancellationToken)
         {
-            // If the command's Id has private set, you might need to use reflection or change the DTO to handle it.
-            // typeof(UpdatedServiceCommands).GetProperty("Id")?.SetValue(command, id);
-            
-            // To ensure the ID from route is used, if your command allows setting it:
+           
             var propertyInfo = command.GetType().GetProperty("Id");
             if(propertyInfo != null && propertyInfo.CanWrite)
             {
@@ -53,8 +50,7 @@ namespace QueueManagement.API.Controllers
         [HttpPatch("{id:guid}/lock")]
         public async Task<IActionResult> LockService([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            // Assuming LockServiceCommand has a constructor or you can set properties. Provide a helper method or change private set to set.
-            // Here using reflection to circumvent private set issue if it exists
+            
             var command = new LockServiceCommand();
             var propertyInfo = command.GetType().GetProperty("Id");
             if (propertyInfo != null)

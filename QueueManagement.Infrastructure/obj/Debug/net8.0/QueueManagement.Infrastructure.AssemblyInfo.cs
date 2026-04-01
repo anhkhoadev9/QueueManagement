@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QueueManagement.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76aa9be24bbfea6b985c37685e7d43c8ef8c17fd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+551935f185c446be6cc2504951fcfe855c07bbd7")]
 [assembly: System.Reflection.AssemblyProductAttribute("QueueManagement.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QueueManagement.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
