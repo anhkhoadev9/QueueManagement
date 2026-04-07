@@ -51,7 +51,7 @@ namespace QueueManagement.API.Controllers
         }
  
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<RefreshTokenDto>> RefreshToken([FromBody] RefreshTokenCommand request, CancellationToken cancellation)
+        public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenCommand request, CancellationToken cancellation)
         {
             var result = await _mediator.Send(request, cancellation);
             return Ok(result);

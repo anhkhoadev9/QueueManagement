@@ -180,22 +180,26 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             var newPassword = _passwordGenerator.Generate();
 
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            Console.WriteLine($"Password raw: {newPassword}");
+            
             // Reset password bằng token
             var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
-            Console.WriteLine($"Reset success: {result.Succeeded}");
-            foreach (var error in result.Errors)
-            {
-                Console.WriteLine(error.Description);
-            }
+            
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new Exception($"Failed to reset password: {errors}");
             }
-            var body = $@"<h3>Khôi phục mật khẩu</h3><p>Mật khẩu mới của bạn: <strong>{newPassword}</strong></p><p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>";
-            await _emailLogRepository.SendAsync(input, subject, body);
-            /*await _userManager.UpdateAsync(user); */
+
+            try
+            {
+                var body = $@"<h3>Khôi phục mật khẩu</h3><p>Mật khẩu mới của bạn: <strong>{newPassword}</strong></p><p>Vui lòng đổi mật khẩu sau khi đăng nhập.</p>";
+                await _emailLogRepository.SendAsync(input, subject, body);
+            }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi gửi mail nhưng không làm crash cả request vì mật khẩu đã đổi thành công
+                Console.WriteLine($"WARNING: Email sending failed: {ex.Message}");
+            }
             ;
             return newPassword;
         }
