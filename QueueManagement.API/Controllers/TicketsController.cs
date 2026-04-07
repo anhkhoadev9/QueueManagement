@@ -48,8 +48,7 @@ namespace QueueManagement.API.Controllers
             return Ok(result);
         }
         [HttpGet("waitings")]
-        public async Task<ActionResult<List<TicketDto>>> GetAllWaitingTickets(
-    CancellationToken cancellation)
+        public async Task<ActionResult<List<TicketDto>>> GetAllWaitingTickets(CancellationToken cancellation)
         {
             // Query không cần tham số - tạo mới trong action
             var query = new GetAllWattingTicketsQuery();
@@ -73,12 +72,12 @@ namespace QueueManagement.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("call")]
-        public async Task<IActionResult> CallTicket(CallTicketCommand command, CancellationToken cancellationToken)
-        {
-            var result = await _mediator.Send(command, cancellationToken);
-            return Ok(result);
-        }
+        //[HttpPost("call")]
+        //public async Task<IActionResult> CallTicket(CallTicketCommand command, CancellationToken cancellationToken)
+        //{
+        //    var result = await _mediator.Send(command, cancellationToken);
+        //    return Ok(result);
+        //}
 
         [HttpPost("call-next")]
         public async Task<ActionResult<TicketDto>> CallNextTicket(CallNextTicketCommand command, CancellationToken cancellationToken)

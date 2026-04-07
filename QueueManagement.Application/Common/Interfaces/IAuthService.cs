@@ -25,6 +25,7 @@ namespace QueueManagement.Application.Common.Interfaces
 
         Task<AuthUserDto> CheckPasswordAsync(string login, string password);
         Task<AuthResponseDto> LoginAsync(string loginInfo, string password, CancellationToken cancellationToken = default);
+        Task<AuthResponseDto> RefreshToken( string refreshtoken, CancellationToken cancellationToken);
         Task<bool> LogoutAsync(string? refreshToken = null);
         Task<bool> ValidateCredentialsAsync(string loginInfo, string password);
         Task<string> ForgotPassword(string email,CancellationToken cancellationToken=default);

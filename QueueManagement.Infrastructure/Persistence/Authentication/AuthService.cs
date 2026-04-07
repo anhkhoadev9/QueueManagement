@@ -26,6 +26,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QueueManagement.Infrastructure.Persistence.Authentication
@@ -413,7 +414,7 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
             var tokens = await _jwtTokenGenerator.GenerateTokenAsync(user.UserId, user.Email, roles);
 
             // 7. Save refresh token
-            var refreshToken = RefreshToken.Create(domainUser.Id, tokens.RefreshToken);
+            var refreshToken = Domain.Entities.RefreshToken.Create(domainUser.Id, tokens.RefreshToken);
             await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -590,7 +591,7 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
                 roles);
 
             // 6. Save refresh token
-            var refreshToken = RefreshToken.Create(user.Id, tokens.RefreshToken);
+            var refreshToken = Domain.Entities.RefreshToken.Create(user.Id, tokens.RefreshToken);
             await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -603,6 +604,48 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
                 ExpiresIn = tokens.ExpiresIn,
                 TokenType = tokens.TokenType
             };
+        }
+
+        public async Task<AuthResponseDto> RefreshToken(string refreshtoken, CancellationToken cancellationToken)
+        {
+            var token = await _refreshTokenRepository.GetByTokenAsync(refreshtoken, cancellationToken);
+            if (token == null || token.IsRevoked || token.IsExpired())
+                throw new UnauthorizedAccessException();
+
+            //  lấy domain user
+            var user = await _userRepository
+                .GetByIdAsync(token.UserId, cancellationToken);
+            if (user == null) throw new NotFoundException("Not found user");
+            //  lấy identityId từ user
+            var identityId = user.IdentityUserId;
+            // lấy role
+            var roles = await _roleService.GetUserRoles(identityId);
+            // revoke token cũ
+            token.Revoke();
+
+            // tạo token mới
+            var generate = await _jwtTokenGenerator.GenerateTokenAsync(
+                identityId,
+                user.Email,
+                roles
+            );
+            // tạo refresh token mới
+            var newRefresh = QueueManagement.Domain.Entities.RefreshToken.Create(user.Id, generate.RefreshToken);
+           
+            await _refreshTokenRepository.AddAsync(newRefresh);
+            await _unitOfWork.SaveChangesAsync();
+            var result = new AuthResponseDto
+            {
+                AccessToken = generate.AccessToken,
+                RefreshToken = newRefresh.Token,
+                ExpiresAt = generate.ExpiresAt,
+                ExpiresIn = generate.ExpiresIn,
+                TokenType = generate.TokenType
+
+
+            };
+            
+            return result;
         }
     }
 
