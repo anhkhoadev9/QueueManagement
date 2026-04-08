@@ -23,7 +23,7 @@ namespace QueueManagement.Application.Features.Tickets.Commands.UpdateTicketStat
 
         public async Task<bool> Handle(UpdateTicketStatusCommand request, CancellationToken cancellationToken)
         {
-            var ticket = await _unitOfWork.QueueTicketRepository.GetByIdAsync(request.TicketId);
+            var ticket = await _unitOfWork.QueueTicketRepository.GetTicketWithDetailsAsync(request.TicketId, cancellationToken);
 
             if (ticket == null)
             {
@@ -57,18 +57,29 @@ namespace QueueManagement.Application.Features.Tickets.Commands.UpdateTicketStat
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Notify
+            // Notify via SignalR
             var ticketDto = new TicketDto
             {
                 Id = ticket.Id,
                 TicketNumber = ticket.TicketNumber,
                 CustomerName = ticket.CustomerName,
                 PhoneNumber = ticket.PhoneNumber,
+                ServiceName = ticket.Service?.Name ?? string.Empty,
+                ServiceId = ticket.ServiceId,
                 Status = ticket.Status,
                 CalledAt = ticket.CalledAt
             };
 
-            await _hubService.NotifyTicketCalled(ticketDto);
+            if (ticket.Status == TicketStatus.Completed)
+            {
+                await _hubService.NotifyTicketCompleted(ticketDto);
+            }
+            else
+            {
+                await _hubService.NotifyTicketCalled(ticketDto);
+            }
+
+            await _hubService.NotifyQueueUpdated();
 
             return true;
         }

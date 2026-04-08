@@ -53,6 +53,10 @@ namespace QueueManagement.Application.Middleware
                     HttpStatusCode.UnprocessableEntity,
                     JsonSerializer.Serialize(new { Error = "Domain Validation Error", Details = domainEx.Message })
                 ),
+                UnauthorizedException unauthorizedEx => (
+                    HttpStatusCode.Unauthorized,
+                    JsonSerializer.Serialize(new { Error = "Unauthorized", Details = unauthorizedEx.Message })
+                ),
                 _ => (
                     HttpStatusCode.InternalServerError,
                     JsonSerializer.Serialize(new { Error = "Internal Server Error", Details = exception.Message })

@@ -7,6 +7,7 @@ namespace QueueManagement.Application.Common.Interfaces
     {
         Task NotifyTicketCreated(TicketDto ticket);
         Task NotifyTicketCalled(TicketDto ticket);
+        Task NotifyTicketCompleted(TicketDto ticket);
         Task NotifyQueueUpdated();
     }
 }

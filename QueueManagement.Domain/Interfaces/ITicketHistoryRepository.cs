@@ -9,5 +9,6 @@ namespace QueueManagement.Domain.Interfaces
 {
     public interface ITicketHistoryRepository:IGenericRepository<TicketHistory>,IPaginatedRepository<TicketHistory>
     {
+        
     }
 }

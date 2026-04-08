@@ -24,6 +24,11 @@ namespace QueueManagement.Infrastructure.SignalR
             await _hubContext.Clients.All.SendAsync("ReceiveTicketCalled", ticket);
         }
 
+        public async Task NotifyTicketCompleted(TicketDto ticket)
+        {
+            await _hubContext.Clients.All.SendAsync("ReceiveTicketCompleted", ticket);
+        }
+
         public async Task NotifyQueueUpdated()
         {
             await _hubContext.Clients.All.SendAsync("QueueUpdated");

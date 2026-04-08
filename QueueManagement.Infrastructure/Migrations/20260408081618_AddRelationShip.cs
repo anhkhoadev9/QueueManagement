@@ -6,11 +6,17 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QueueManagement.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddEntityEmailLog : Migration
+    public partial class AddRelationShip : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<Guid>(
+                name: "UserId",
+                table: "Feedbacks",
+                type: "uuid",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "EmailLogs",
                 columns: table => new
@@ -36,13 +42,37 @@ namespace QueueManagement.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_EmailLogs", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Feedbacks_UserId",
+                table: "Feedbacks",
+                column: "UserId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Feedbacks_Users_UserId",
+                table: "Feedbacks",
+                column: "UserId",
+                principalTable: "Users",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Feedbacks_Users_UserId",
+                table: "Feedbacks");
+
             migrationBuilder.DropTable(
                 name: "EmailLogs");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Feedbacks_UserId",
+                table: "Feedbacks");
+
+            migrationBuilder.DropColumn(
+                name: "UserId",
+                table: "Feedbacks");
         }
     }
 }

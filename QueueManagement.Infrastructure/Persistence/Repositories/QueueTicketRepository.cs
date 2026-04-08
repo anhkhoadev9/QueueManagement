@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using QueueManagement.Application.DTOs;
 using QueueManagement.Domain.Entities;
 using QueueManagement.Domain.Enum;
 using QueueManagement.Domain.Interfaces;
 using QueueManagement.Infrastructure.Persistence.Context;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QueueManagement.Infrastructure.Persistence.Repositories
@@ -54,6 +55,12 @@ namespace QueueManagement.Infrastructure.Persistence.Repositories
                 .Where(q => q.Status == TicketStatus.Waiting)
                 .OrderBy(q => q.IssuedAt)
                 .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<QueueTicket>> GetActiveTicketsByUserId(Guid UserId, CancellationToken cancellationToken)
+        {
+            // Stubbed out as per user request to not use formal relationship for now
+            return Task.FromResult(new List<QueueTicket>());
         }
     }
 }

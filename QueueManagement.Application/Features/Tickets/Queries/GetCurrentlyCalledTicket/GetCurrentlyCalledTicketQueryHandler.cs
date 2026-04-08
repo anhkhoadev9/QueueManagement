@@ -28,6 +28,7 @@ namespace QueueManagement.Application.Features.Tickets.Queries.GetCurrentlyCalle
                 CustomerName = ticket.CustomerName,
                 PhoneNumber = ticket.PhoneNumber,
                 ServiceName = ticket.Service?.Name ?? "N/A",
+                ServiceId=ticket.Service?.Id,
                 Status = ticket.Status,
                 IssuedAt = ticket.IssuedAt,
                 CalledAt = ticket.CalledAt

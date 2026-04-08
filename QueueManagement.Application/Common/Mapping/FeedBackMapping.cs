@@ -19,6 +19,7 @@ namespace QueueManagement.Application.Common.Mapping
             return new Feedback(
             feedBackCommand.QueueTicketId,
                 feedBackCommand.ServiceId,
+                feedBackCommand.UserId,
                 feedBackCommand.Rating ?? 0,
                 feedBackCommand.Comment
 
@@ -38,7 +39,8 @@ namespace QueueManagement.Application.Common.Mapping
                 Rating = f.Rating,
                 Comment = f.Comment,
                 SubmittedAt = f.SubmittedAt,
-
+                UserId = f.UserId?? Guid.Empty,  // ✅ Thêm UserId
+                UserName = f.User?.FullName ?? "Khách vãng lai",  // Lấy tên từ User
                 // Optional: Load thêm nếu có Include
                 TicketNumber = f.QueueTicket?.TicketNumber,
                 CustomerName = f.QueueTicket?.CustomerName,

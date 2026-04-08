@@ -11,5 +11,7 @@ namespace QueueManagement.Domain.Interfaces
         Task<QueueTicket?> GetCurrentlyCalledTicketAsync(CancellationToken cancellationToken = default);
         Task<List<QueueTicket>> GetAllWaitingTicketsWithServiceAsync(CancellationToken cancellationToken = default);
         Task<List<QueueTicket>> GetWaitingTicketsWithServiceAsync(CancellationToken cancellationToken = default);
+        Task<List<QueueTicket>> GetActiveTicketsByUserId(Guid UserId, CancellationToken cancellationToken);
+
     }
 }

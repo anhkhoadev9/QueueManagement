@@ -1,4 +1,4 @@
-﻿//using QueueManagement.Application;
+//using QueueManagement.Application;
 //using QueueManagement.Infrastructure;
 //using QueueManagement.Application.Middleware;
 //using QueueManagement.Infrastructure.SignalR;
@@ -511,22 +511,6 @@ builder.Services.AddSignalR();
 var app = builder.Build();
 
 // ===== MIDDLEWARE PIPELINE =====
-
-// 🔥 Thêm middleware xử lý OPTIONS trước CORS
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == "OPTIONS")
-    {
-        var origin = context.Request.Headers["Origin"].ToString();
-        context.Response.Headers.Add("Access-Control-Allow-Origin", origin);
-        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept");
-        context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-        context.Response.StatusCode = 204;
-        return;
-    }
-    await next();
-});
 
 // 1. Exception Handler
 app.UseMiddleware<ExceptionMiddleware>();

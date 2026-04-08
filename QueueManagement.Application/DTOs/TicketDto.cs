@@ -10,6 +10,7 @@ namespace QueueManagement.Application.DTOs
         public string CustomerName { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string ServiceName { get; set; } = null!;
+        public Guid? ServiceId { get; set; }
         public TicketStatus Status { get; set; }
         public DateTime IssuedAt { get; set; }
         public DateTime? CalledAt { get; set; }

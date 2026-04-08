@@ -232,12 +232,17 @@ namespace QueueManagement.Infrastructure.Migrations
                     b.Property<Guid>("UpdatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("QueueTicketId")
                         .IsUnique();
 
                     b.HasIndex("ServiceId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Feedbacks", (string)null);
                 });
@@ -730,9 +735,15 @@ namespace QueueManagement.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("QueueManagement.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("QueueTicket");
 
                     b.Navigation("Service");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("QueueManagement.Domain.Entities.QueueTicket", b =>

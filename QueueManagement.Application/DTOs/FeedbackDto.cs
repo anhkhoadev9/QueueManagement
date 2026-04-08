@@ -18,5 +18,7 @@ namespace QueueManagement.Application.DTOs
         public string? TicketNumber { get; set; }
         public string? CustomerName { get; set; }
         public string ServiceName { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
+        public string? UserName { get; set; }
     }
 }

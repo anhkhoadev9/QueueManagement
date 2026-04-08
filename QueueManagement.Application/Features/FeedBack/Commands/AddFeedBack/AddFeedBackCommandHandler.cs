@@ -21,6 +21,7 @@ namespace QueueManagement.Application.Features.FeedBack.Commands.AddFeedBack
         {
             var feedback = FeedBackMapping.ToEntity(request);
             await _unitOfWork.FeedbackRepository.AddAsync(feedback, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }
     }

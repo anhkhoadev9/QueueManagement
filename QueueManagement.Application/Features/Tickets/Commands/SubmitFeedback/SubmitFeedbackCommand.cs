@@ -7,6 +7,7 @@ namespace QueueManagement.Application.Features.Tickets.Commands.SubmitFeedback
     {
         public Guid TicketId { get; set; }
         public Guid ServiceId { get; set; }
+        public Guid UserId { get; set; }
         public int Rating { get; set; }
         public string? Comment { get; set; }
     }

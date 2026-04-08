@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace QueueManagement.Application.Features.Tickets.Commands.CallNextTicket
 {
-    public class CallNextTicketCommandHandler : IRequestHandler<CallNextTicketCommand,Unit>
+    public class CallNextTicketCommandHandler : IRequestHandler<CallNextTicketCommand, TicketDto>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IQueueHubService _queueHubService;
@@ -58,7 +58,7 @@ namespace QueueManagement.Application.Features.Tickets.Commands.CallNextTicket
         //    };
         //    return ticketDto;
         //}
-        public async Task<Unit> Handle(CallNextTicketCommand request, CancellationToken cancellationToken)
+        public async Task<TicketDto> Handle(CallNextTicketCommand request, CancellationToken cancellationToken)
         {
             // Tìm vé đang đợi lâu nhất (IssuedAt cũ nhất)
             var waitingTickets = await _unitOfWork.QueueTicketRepository.GetWaitingTicketsWithServiceAsync(cancellationToken);
@@ -93,7 +93,7 @@ namespace QueueManagement.Application.Features.Tickets.Commands.CallNextTicket
                 CalledAt = nextTicket.CalledAt
             };
              await _queueHubService.NotifyTicketCalled(ticketDto);
-            return Unit.Value;
+            return ticketDto;
         }
 
       

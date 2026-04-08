@@ -12,8 +12,8 @@ using QueueManagement.Infrastructure.Persistence.Context;
 namespace QueueManagement.Infrastructure.Migrations
 {
     [DbContext(typeof(QueueManagementDbContext))]
-    [Migration("20260330062424_AddEntityEmailLog")]
-    partial class AddEntityEmailLog
+    [Migration("20260408081618_AddRelationShip")]
+    partial class AddRelationShip
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -235,12 +235,17 @@ namespace QueueManagement.Infrastructure.Migrations
                     b.Property<Guid>("UpdatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("QueueTicketId")
                         .IsUnique();
 
                     b.HasIndex("ServiceId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Feedbacks", (string)null);
                 });
@@ -733,9 +738,15 @@ namespace QueueManagement.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("QueueManagement.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("QueueTicket");
 
                     b.Navigation("Service");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("QueueManagement.Domain.Entities.QueueTicket", b =>

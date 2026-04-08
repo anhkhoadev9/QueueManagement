@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using QueueManagement.Application.Common.GenericPage;
 using QueueManagement.Application.Common.Mapping;
 using QueueManagement.Application.DTOs;
@@ -22,7 +22,8 @@ namespace QueueManagement.Application.Features.FeedBack.Queries.GetPaginated
         }
         public async Task<PaginatedResult<FeedbackDto>> Handle(GetPaginatedQuery request, CancellationToken cancellationToken)
         {
-            var query = _unitOfWork.FeedbackRepository.Query();
+            var query = _unitOfWork.FeedbackRepository.GetFeedbackQueryWithDetails();
+
             var convertToDto = new PaginationRequestDto
             {
                 PageSize = request.PageSize,
@@ -30,21 +31,25 @@ namespace QueueManagement.Application.Features.FeedBack.Queries.GetPaginated
                 MaxPageSize = request.MaxPageSize,
                 IncludeTicketDetails = request.IncludeTicketDetails,
             };
+
             var feedback = await _unitOfWork.FeedbackRepository.GetPaginatedAsync<FeedbackDto>(
                query,
-              convertToDto,
-             s => new FeedbackDto
-             {
-                 Id = s.Id,
-                 Comment = s.Comment,
-                 Rating = s.Rating,
-                 ServiceName = s.Service.Name,
-                 QueueTicketId = s.QueueTicketId,
-
-
-             },
-           cancellationToken
-           );
+               convertToDto,
+               s => new FeedbackDto
+               {
+                   Id = s.Id,
+                   Comment = s.Comment,
+                   Rating = s.Rating,
+                   SubmittedAt = s.SubmittedAt,
+                   UserId = s.UserId ?? Guid.Empty,
+                   UserName = s.User != null ? s.User.FullName : "Khách vãng lai",
+                   ServiceName = s.Service != null ? s.Service.Name : (s.QueueTicket != null && s.QueueTicket.Service != null ? s.QueueTicket.Service.Name : string.Empty),
+                   QueueTicketId = s.QueueTicketId,
+                   TicketNumber = s.QueueTicket != null ? s.QueueTicket.TicketNumber : null,
+                   CustomerName = s.QueueTicket != null ? s.QueueTicket.CustomerName : null
+               },
+               cancellationToken
+            );
 
             return feedback;
         }
