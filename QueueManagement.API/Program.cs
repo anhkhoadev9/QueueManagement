@@ -515,15 +515,16 @@ var app = builder.Build();
 // 1. Exception Handler
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
-
+// 4. Routing
+app.UseRouting();
+// 3. CORS
+app.UseCors("FrontendPolicy");
 // 2. HTTPS Redirection
 app.UseHttpsRedirection();
 
-// 3. CORS
-app.UseCors("FrontendPolicy");
 
-// 4. Routing
-app.UseRouting();
+
+
 
 // 5. API Versioning
 app.UseApiVersioning();
