@@ -1,271 +1,3 @@
-//using QueueManagement.Application;
-//using QueueManagement.Infrastructure;
-//using QueueManagement.Application.Middleware;
-//using QueueManagement.Infrastructure.SignalR;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Mvc.Versioning;
-//using Microsoft.OpenApi.Models;
-//using System.Text.Json.Serialization;
-//using QueueManagement.API.Middlewares;
-//using Microsoft.Extensions.Configuration;
-//using QueueManagement.Domain.Entities.DTOs;
-//using QueueManagement.Domain.Entities;
-//using QueueManagement.Domain.Interfaces;
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
-//using Microsoft.IdentityModel.Tokens;
-//using System.Text;
-//using System.Text.Json;
-//using Serilog; // Using Serilog
-
-//var builder = WebApplication.CreateBuilder(args);
-//builder.Services.AddHttpClient();
-//// ===== 1. CẤU HÌNH SERILOG - CHỈ 1 LẦN =====
-//builder.Host.UseSerilog((context, config) =>
-//{
-//    config.ReadFrom.Configuration(context.Configuration)
-//          .Enrich.WithProperty("Application", "QueueManagement")
-//          .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName);
-
-//    // Log ra console để dễ debug
-//    config.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
-
-//    // Log ra Seq nếu có cấu hình
-//    var seqServerUrl = context.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
-//    config.WriteTo.Seq(seqServerUrl);
-//});
-//var port = Environment.GetEnvironmentVariable("PORT");
-
-//if (!string.IsNullOrEmpty(port))
-//{
-//    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-//}
-//// ===== 2. THÊM DIAGNOSTIC CONTEXT CHO SERILOG =====
-//builder.Services.AddHttpContextAccessor();
-//builder.Services.AddSingleton<Serilog.Core.LoggingLevelSwitch>();
-
-//// ===== 3. CÁC CẤU HÌNH KHÁC =====
-//#region Infratruture & Service
-//builder.Services.AddInfrastructureServices(builder.Configuration);
-//builder.Services.AddApplication();
-//#endregion
-
-//#region Authentication
-//// Đọc cấu hình JWT từ appsettings.json
-//var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-//var secretKey = jwtSettings["Secret"];
-
-//// Đăng ký JwtSettings vào DI container
-//builder.Services.Configure<JwtSettings>(jwtSettings);
-//builder.Services.Configure<EmailSettings>(
-//    builder.Configuration.GetSection("EmailSettings"));
-//// Cấu hình Authentication
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    options.SaveToken = true;
-//    options.RequireHttpsMetadata = false;
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidateLifetime = true,
-//        ValidateIssuerSigningKey = true,
-//        ValidIssuer = jwtSettings["Issuer"],
-//        ValidAudience = jwtSettings["Audience"],
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-//        ClockSkew = TimeSpan.Zero,
-//        RequireExpirationTime = true,
-//        RequireSignedTokens = true
-//    };
-
-//    options.Events = new JwtBearerEvents
-//    {
-//        OnAuthenticationFailed = context =>
-//        {
-//            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-//            {
-//                context.Response.Headers.Add("Token-Expired", "true");
-//            }
-//            return Task.CompletedTask;
-//        },
-//        OnChallenge = context =>
-//        {
-//            context.HandleResponse();
-//            context.Response.StatusCode = 401;
-//            context.Response.ContentType = "application/json";
-
-//            var result = JsonSerializer.Serialize(new
-//            {
-//                error = "You are not authorized",
-//                statusCode = 401
-//            });
-
-//            return context.Response.WriteAsync(result);
-//        }
-//    };
-//});
-
-//// Thêm Authorization
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-//    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
-//    options.AddPolicy("AdminOrUser", policy => policy.RequireRole("Admin", "User"));
-//});
-//#endregion
-
-//#region Controller
-//builder.Services.AddControllers()
-//    .AddJsonOptions(options =>
-//    {
-//        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-//        options.JsonSerializerOptions.PropertyNamingPolicy = null;
-//    });
-//#endregion
-
-//#region API EXPLORER & SWAGGER
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.SwaggerDoc("v1", new OpenApiInfo
-//    {
-//        Title = "QueueManagement API",
-//        Version = "v1",
-//        Description = "API quản lý hàng đợi"
-//    });
-
-//    // Thêm cấu hình JWT cho Swagger
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
-//        Name = "Authorization",
-//        In = ParameterLocation.Header,
-//        Type = SecuritySchemeType.ApiKey,
-//        Scheme = "Bearer"
-//    });
-
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            new string[] {}
-//        }
-//    });
-//});
-
-//builder.Services.AddApiVersioning(option =>
-//{
-//    option.DefaultApiVersion = new ApiVersion(1, 0);
-//    option.AssumeDefaultVersionWhenUnspecified = true;
-//    option.ReportApiVersions = true;
-//    option.ApiVersionReader = new UrlSegmentApiVersionReader();
-//});
-
-//builder.Services.AddVersionedApiExplorer(options =>
-//{
-//    options.GroupNameFormat = "'v'VVV";
-//    options.SubstituteApiVersionInUrl = true;
-//});
-//#endregion
-
-//#region CORS
-//var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
-
-//if (allowedOrigins == null || allowedOrigins.Length == 0)
-//{
-//    Console.WriteLine("WARNING: No allowed origins configured. Using defaults.");
-//    allowedOrigins = new[]
-//    {
-//        "https://queue-management-ui.vercel.app",    
-//        "https://www.queue-management-ui.vercel.app",
-//        "http://localhost:5173",    
-//        "https://localhost:5173",
-//        "http://localhost:3000",
-//        "https://localhost:3000",
-//        "http://localhost:5000",
-//        "https://localhost:7164"
-//    };
-//}
-
-//builder.Services.AddCors(option =>
-//{
-//    option.AddPolicy("FrontendPolicy", policy =>
-//    {
-//        policy.WithOrigins(allowedOrigins)
-//              .AllowAnyHeader()
-//              .AllowAnyMethod()
-//              .AllowCredentials()
-//              .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
-//    });
-//});
-//#endregion
-
-//#region REAL-TIME & OTHERS
-//builder.Services.AddSignalR();
-//#endregion
-
-//var app = builder.Build();
-
-//// ===== 4. MIDDLEWARE PIPELINE =====
-//// 1. Exception Handler - Đầu tiên
-//app.UseMiddleware<ExceptionMiddleware>();
-//app.UseMiddleware<LoggingMiddleware>();
-
-//// 2. HTTPS Redirection
-//app.UseHttpsRedirection();
-
-//// 3. CORS - Trước mọi thứ khác
-//app.UseCors("FrontendPolicy");
-
-//// 4. Routing
-//app.UseRouting();
-
-//// 5. API Versioning
-//app.UseApiVersioning();
-
-//// 6. Authentication & Authorization
-//app.UseAuthentication();
-//app.UseAuthorization();
-
-//// 7. Swagger - Chỉ Development
-////if (app.Environment.IsDevelopment())
-////{
-
-//app.UseSwagger();
-//app.UseSwaggerUI(c =>
-//{
-//    c.SwaggerEndpoint("/swagger/v1/swagger.json", "QueueManagement API V1");
-//    /*c.RoutePrefix = string.Empty;*/
-//    c.RoutePrefix = "swagger";// Swagger hiện ngay tại root domain (dễ test nhất)
-//});
-//app.Logger.LogInformation("🚀 URLs: {urls}", app.Urls);
-////}
-
-//// 8. Endpoints - Cuối cùng
-//app.MapControllers();
-//app.MapHub<QueueHub>("/queue-hub");
-
-//// ===== 5. TEST LOG KHI APP START =====
-//Log.Information("🚀 Application started successfully");
-//Log.Information("📊 Seq URL: http://localhost:5341");
-//Log.Information("🌍 Environment: {Environment}", app.Environment.EnvironmentName);
-
-//app.Run();
-
-//// ===== 6. DỌN DẸP KHI APP TẮT =====
-//Log.CloseAndFlush();
 using QueueManagement.Application;
 using QueueManagement.Infrastructure;
 using QueueManagement.Application.Middleware;
@@ -301,20 +33,13 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 
 builder.Services.AddHttpClient();
 
-// ===== 1. CẤU HÌNH SERILOG - TẮT RELOAD =====
+// ===== 1. CẤU HÌNH SERILOG =====
 builder.Host.UseSerilog((context, config) =>
 {
-    // 🔥 Tắt reloadOnChange để tránh file watcher
     config.ReadFrom.Configuration(context.Configuration)
           .Enrich.WithProperty("Application", "QueueManagement")
           .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName);
-
-    // Log ra console để dễ debug
     config.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
-
-    // 🔥 TẠM THỜI TẮT SEQ ĐỂ GIẢM TẢI
-    // var seqServerUrl = context.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341";
-    // config.WriteTo.Seq(seqServerUrl);
 });
 
 var port = Environment.GetEnvironmentVariable("PORT");
@@ -323,22 +48,22 @@ if (!string.IsNullOrEmpty(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
-// ===== 2. THÊM DIAGNOSTIC CONTEXT =====
+// ===== 2. DIAGNOSTIC CONTEXT =====
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<Serilog.Core.LoggingLevelSwitch>();
 
-// ===== 3. CẤU HÌNH CONFIGURATION - TẮT RELOAD =====
-// 🔥 Tất cả AddJsonFile đều set reloadOnChange: false
+// ===== 3. CẤU HÌNH CONFIGURATION =====
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
 builder.Configuration.AddEnvironmentVariables();
 
-// ===== 4. CÁC CẤU HÌNH KHÁC =====
+// ===== 4. INFRASTRUCTURE & SERVICES =====
 #region Infrastructure & Service
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplication();
 #endregion
 
+// ===== 5. AUTHENTICATION =====
 #region Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["Secret"];
@@ -385,13 +110,7 @@ builder.Services.AddAuthentication(options =>
             context.HandleResponse();
             context.Response.StatusCode = 401;
             context.Response.ContentType = "application/json";
-
-            var result = JsonSerializer.Serialize(new
-            {
-                error = "You are not authorized",
-                statusCode = 401
-            });
-
+            var result = JsonSerializer.Serialize(new { error = "You are not authorized", statusCode = 401 });
             return context.Response.WriteAsync(result);
         }
     };
@@ -405,6 +124,7 @@ builder.Services.AddAuthorization(options =>
 });
 #endregion
 
+// ===== 6. CONTROLLERS =====
 #region Controller
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -414,6 +134,7 @@ builder.Services.AddControllers()
     });
 #endregion
 
+// ===== 7. SWAGGER =====
 #region API EXPLORER & SWAGGER
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -424,7 +145,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API quản lý hàng đợi"
     });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
@@ -433,20 +153,9 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
+        { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, new string[] {} }
     });
 });
 
@@ -465,6 +174,7 @@ builder.Services.AddVersionedApiExplorer(options =>
 });
 #endregion
 
+// ===== 8. CORS =====
 #region CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 
@@ -484,7 +194,6 @@ if (allowedOrigins == null || allowedOrigins.Length == 0)
     };
 }
 
-// In ra để debug
 Console.WriteLine("🔧 Allowed Origins:");
 foreach (var origin in allowedOrigins)
 {
@@ -504,36 +213,47 @@ builder.Services.AddCors(option =>
 });
 #endregion
 
+// ===== 9. SIGNALR =====
 #region REAL-TIME & OTHERS
 builder.Services.AddSignalR();
 #endregion
 
 var app = builder.Build();
 
-// ===== MIDDLEWARE PIPELINE =====
+// ==============================================
+// ===== MIDDLEWARE PIPELINE - ĐÚNG THỨ TỰ =====
+// ==============================================
 
-// 1. Exception Handler
+// ✅ 1. CORS middleware (PHẢI ĐẦU TIÊN)
+// Lý do: Xử lý preflight requests (OPTIONS) trước khi request đi vào pipeline
+app.UseCors("FrontendPolicy");
+
+// ✅ 2. Exception handling (BẮT LỖI TOÀN BỘ)
+// Lý do: Phải bắt lỗi từ tất cả các middleware phía sau
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
-// 4. Routing
-app.UseRouting();
-// 3. CORS
-app.UseCors("FrontendPolicy");
-// 2. HTTPS Redirection
+
+// ✅ 3. HTTPS Redirection
+// Lý do: Chuyển HTTP sang HTTPS trước khi xử lý
 app.UseHttpsRedirection();
 
+// ✅ 4. Routing
+// Lý do: Xác định route cho request
+app.UseRouting();
 
-
-
-
-// 5. API Versioning
+// ✅ 5. API Versioning
+// Lý do: Xác định version API trước khi authentication
 app.UseApiVersioning();
 
-// 6. Authentication & Authorization
+// ✅ 6. Authentication (PHẢI TRƯỚC Authorization)
+// Lý do: Xác định danh tính người dùng trước khi kiểm tra quyền
 app.UseAuthentication();
+
+// ✅ 7. Authorization
+// Lý do: Kiểm tra quyền sau khi đã xác định danh tính
 app.UseAuthorization();
 
-// 7. Swagger - Chỉ Development
+// ✅ 8. Swagger (Chỉ Development)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -546,7 +266,8 @@ if (app.Environment.IsDevelopment())
 
 app.Logger.LogInformation("🚀 URLs: {urls}", app.Urls);
 
-// 8. Endpoints
+// ✅ 9. Endpoints (LUÔN CUỐI CÙNG)
+// Lý do: Xử lý request sau khi đã qua tất cả middleware
 app.MapControllers();
 app.MapHub<QueueHub>("/queue-hub");
 
