@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using QueueManagement.Application.Common.Interfaces;
@@ -26,11 +27,13 @@ namespace QueueManagement.Application.Features.Auth.Commands.Login
            
         }
 
-        public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<AuthResponseDto> Handle(LoginCommand request , CancellationToken cancellationToken)
         {
             var result = await _identityService.LoginAsync(request.LoginInfo, request.Password);
             return result;
         }
+
     }
 }
+
 

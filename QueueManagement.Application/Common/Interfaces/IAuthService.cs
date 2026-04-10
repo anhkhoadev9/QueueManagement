@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using QueueManagement.Application.DTOs;
 using QueueManagement.Domain.Entities;
@@ -24,7 +25,7 @@ namespace QueueManagement.Application.Common.Interfaces
             Guid domainUserId);
 
         Task<AuthUserDto> CheckPasswordAsync(string login, string password);
-        Task<AuthResponseDto> LoginAsync(string loginInfo, string password, CancellationToken cancellationToken = default);
+        Task<AuthResponseDto> LoginAsync(string loginInfo, string password,  CancellationToken cancellationToken = default);
         Task<AuthResponseDto> RefreshToken( string refreshtoken, CancellationToken cancellationToken);
         Task<bool> LogoutAsync(string? refreshToken = null);
         Task<bool> ValidateCredentialsAsync(string loginInfo, string password);

@@ -48,6 +48,7 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
+
         public AuthService(
             UserManager<ApplicationUser> userManager, QueueManagementDbContext context, IHttpContextAccessor contextAccessor, IPasswordGenerator passwordGenerator, IEmailLogRepository emailLogRepository, IHttpContextAccessor httpContextAccessor, SignInManager<ApplicationUser> signInManager, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IJwtTokenGenerator jwtTokenGenerator, IRoleService roleService, IUnitOfWork unitOfWork, IConfiguration configuration, IHttpClientFactory httpClientFactory) // Thêm context
         {
@@ -371,6 +372,8 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
 
             return await _userManager.CheckPasswordAsync(user, password);
         }
+
+
         #region Login
         public async Task<AuthResponseDto> LoginAsync(string loginInfo, string password, CancellationToken cancellationToken = default)
         {
@@ -416,11 +419,20 @@ namespace QueueManagement.Infrastructure.Persistence.Authentication
 
             // 6. Generate tokens
             var tokens = await _jwtTokenGenerator.GenerateTokenAsync(user.UserId, user.Email, roles);
-
+            var httpContext = _httpContextAccessor.HttpContext;
             // 7. Save refresh token
             var refreshToken = Domain.Entities.RefreshToken.Create(domainUser.Id, tokens.RefreshToken);
             await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            httpContext.Response.Cookies.Append("refresh_token", tokens.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,           // Không thể truy cập bằng JavaScript
+                Secure = true,             // Chỉ gửi qua HTTPS
+                SameSite = SameSiteMode.Strict, // Chống CSRF
+                Expires = DateTime.UtcNow.AddDays(7), // Thời gian sống của refresh token
+                Path = "/",
+                   
+            });
 
             // 8. Return response
             return new AuthResponseDto

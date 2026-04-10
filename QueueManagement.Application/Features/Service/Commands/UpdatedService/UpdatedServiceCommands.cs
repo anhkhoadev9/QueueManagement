@@ -9,10 +9,10 @@ namespace QueueManagement.Application.Features.Service.Commands.UpdatedService
 {
     public class UpdatedServiceCommands : IRequest<Unit>
     {
-        public Guid Id { get; private set; }
-        public string Name { get; private set; } = null!;
-        public string Description { get; private set; } = null!;
-        public int EstimatedDurationMinus { get; private set; } // Thời gian ước tính (phút)
-        public bool IsActive { get; private set; }
+        public Guid Id { get;  set; }
+        public string Name { get;  set; } = null!;
+        public string Description { get;  set; } = null!;
+        public int EstimatedDurationMinus { get;  set; } // Thời gian ước tính (phút)
+        public bool IsActive { get;  set; }
     }
 }

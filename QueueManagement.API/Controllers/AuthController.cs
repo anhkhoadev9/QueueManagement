@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QueueManagement.API.Middlewares;
+using QueueManagement.Application.DTOs;
 using QueueManagement.Application.Features.Auth.Commands.ChangePassword;
 using QueueManagement.Application.Features.Auth.Commands.ExternalLogin;
 using QueueManagement.Application.Features.Auth.Commands.ForgotPassword;
@@ -11,6 +12,7 @@ using QueueManagement.Application.Features.Auth.Commands.Logout;
 using QueueManagement.Application.Features.Auth.Commands.RefreshToken;
 using QueueManagement.Application.Features.Auth.Commands.Register;
 using QueueManagement.Application.Features.Auth.Commands.Revoked;
+using QueueManagement.Application.Features.Auth.Queries.GetRole;
 using QueueManagement.Domain.Entities.DTOs;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
@@ -31,9 +33,23 @@ namespace QueueManagement.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> LoginAsync(LoginCommand request, CancellationToken cancellation)
         {
-            var login = await _mediator.Send(request, cancellation);
-            return Ok(login);
+            var loginResult = await _mediator.Send(request, cancellation);
+            
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, 
+                SameSite = SameSiteMode.None, 
+                Expires = loginResult.ExpiresAt
+            };
 
+            Response.Cookies.Append("accessToken", loginResult.AccessToken, cookieOptions);
+            Response.Cookies.Append("refreshToken", loginResult.RefreshToken, cookieOptions);
+
+            loginResult.AccessToken = "";
+            loginResult.RefreshToken = "";
+
+            return Ok(loginResult);
         }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromQuery] RegisterCommand request, CancellationToken cancellationToken)
@@ -47,6 +63,8 @@ namespace QueueManagement.API.Controllers
         public async Task<IActionResult> LogoutAsync([FromBody] LogoutCommand request, CancellationToken cancellation)
         {
             await _mediator.Send(request, cancellation);
+            Response.Cookies.Delete("accessToken");
+            Response.Cookies.Delete("refreshToken");
             return NoContent();
         }
  
@@ -85,6 +103,33 @@ namespace QueueManagement.API.Controllers
         {
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> GetMeAsync()
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                return Unauthorized();
+            var role = User.FindFirst(ClaimTypes.Role)?.Value ?? User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+            if (role == null) return NotFound();
+            var query = new QueueManagement.Application.Features.Users.Queries.GetUserById.GetUserByIdQuery { Id = userId };
+            var user = await _mediator.Send(query);
+            if (user == null) return NotFound();
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Code = user.Code,
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                BirthDay = user.BirthDay,
+                StatusUser = user.StatusUser,
+                ProviderName = user.ProviderName,
+                Role = role
+            };
+            return Ok(userDto);
         }
 
     }

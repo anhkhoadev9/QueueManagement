@@ -34,7 +34,8 @@ namespace QueueManagement.Application.Features.Users.Queries.GetUserById
                 PhoneNumber = user.PhoneNumber,
                 BirthDay =  user.BirthDay ?? default,
                 StatusUser = user.StatusUser,
-                ProviderName = user.ProviderName
+                ProviderName = user.ProviderName,
+                
             };
         }
     }

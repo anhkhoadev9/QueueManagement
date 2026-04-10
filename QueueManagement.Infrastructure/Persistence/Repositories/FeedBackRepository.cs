@@ -34,6 +34,7 @@ namespace QueueManagement.Infrastructure.Persistence.Repositories
                 .Include(f => f.Service)
                 .Include(f => f.QueueTicket)
                     .ThenInclude(t => t.Service)
+                .Where(t=>t.IsDelete==false)
                 .AsQueryable();
         }
     }

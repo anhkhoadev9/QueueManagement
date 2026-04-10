@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using QueueManagement.Domain.Entities.DTOs;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace QueueManagement.Application.Features.Auth.Commands.Login
 
         public string LoginInfo { get; set; } = null!;// nhận username hoặc là email từ client
         public string Password { get; set; } = null!;
+        //public HttpContext HttpContext { get; set; } = null!; // Thêm dòng này
 
     }
 }

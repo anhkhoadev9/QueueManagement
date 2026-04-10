@@ -13,5 +13,6 @@ namespace QueueManagement.Application.DTOs
         public DateTime BirthDay { get; set; }
         public StatusUser StatusUser { get; set; }
         public string ProviderName { get; set; }
+        public string Role { get; set; }
     }
 }
