@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,16 +30,40 @@ namespace QueueManagement.API.Controllers
             _httpContextAccessor= httpContextAccessor;
 
         }
+        //[HttpPost("login")]
+        //public async Task<ActionResult<AuthResponseDto>> LoginAsync(LoginCommand request, CancellationToken cancellation)
+        //{
+        //    var loginResult = await _mediator.Send(request, cancellation);
+
+        //    var cookieOptions = new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true, 
+        //        SameSite = SameSiteMode.None, 
+        //        Expires = loginResult.ExpiresAt
+        //    };
+
+        //    Response.Cookies.Append("accessToken", loginResult.AccessToken, cookieOptions);
+        //    Response.Cookies.Append("refreshToken", loginResult.RefreshToken, cookieOptions);
+
+        //    loginResult.AccessToken = "";
+        //    loginResult.RefreshToken = "";
+
+        //    return Ok(loginResult);
+        //}
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> LoginAsync(LoginCommand request, CancellationToken cancellation)
         {
             var loginResult = await _mediator.Send(request, cancellation);
-            
+
+            // ✅ Xóa cookie cũ ngay từ đầu
+            Response.Cookies.Delete("refresh_token");
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, 
-                SameSite = SameSiteMode.None, 
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = loginResult.ExpiresAt
             };
 
@@ -60,11 +84,17 @@ namespace QueueManagement.API.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> LogoutAsync([FromBody] LogoutCommand request, CancellationToken cancellation)
+        public async Task<IActionResult> LogoutAsync(CancellationToken cancellation)
         {
-            await _mediator.Send(request, cancellation);
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var command = new LogoutCommand { RefreshToken = refreshToken };
+                await _mediator.Send(command, cancellation);
+            }
             Response.Cookies.Delete("accessToken");
             Response.Cookies.Delete("refreshToken");
+            Response.Cookies.Delete("refresh_token");
             return NoContent();
         }
  
@@ -98,10 +128,26 @@ namespace QueueManagement.API.Controllers
             return NoContent();
         }
         [HttpPost("google-callback")]
+        [AllowAnonymous]
         public async Task<ActionResult<AuthResponseDto>> GoogleLogin(
             [FromBody] GoogleLoginCommand command)
         {
             var result = await _mediator.Send(command);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = result.ExpiresAt
+            };
+
+            Response.Cookies.Append("accessToken", result.AccessToken, cookieOptions);
+            Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
+
+            result.AccessToken = "";
+            result.RefreshToken = "";
+
             return Ok(result);
         }
 

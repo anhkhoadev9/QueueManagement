@@ -22,6 +22,10 @@ namespace QueueManagement.Application.Features.Auth.Commands.Logout
         public async Task<Unit> Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
 
+            if (string.IsNullOrEmpty(request.RefreshToken))
+            {
+                return Unit.Value;
+            }
             var success = await _authService.LogoutAsync(request.RefreshToken.ToString());
 
             if (!success)
